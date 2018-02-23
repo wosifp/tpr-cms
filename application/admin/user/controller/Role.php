@@ -48,6 +48,7 @@ class Role extends AdminLogin
      */
     public function add(){
         if($this->request->isPost()){
+            $this->error("无权限");
             $insert = [
                 'role_name'=>$this->request->param('role_name')
             ];
@@ -67,6 +68,7 @@ class Role extends AdminLogin
         $id = $this->request->param('id',0);
 
         if($this->request->isPost()){
+            $this->error("无权限");
             $update = $this->param;
 
             //tpr-framework1.0.18+ 会自动过滤无效字段
@@ -88,6 +90,7 @@ class Role extends AdminLogin
      * 删除角色
      */
     public function del(){
+        $this->error("无权限");
         $id = $this->request->param('id');
 
         $result = Db::name('role')->where('id',$id)->delete();
@@ -105,7 +108,7 @@ class Role extends AdminLogin
     public function auth(){
         $role_id = $this->request->param('role_id');
         if($this->request->isPost()){
-
+            $this->error("无权限");
             $result = NodeLogic::adminNode(false);
             $node_list = $result['list'];
 

@@ -23,6 +23,7 @@ class Profile extends AdminLogin
     public function update()
     {
         if ($this->request->isPost()) {
+            $this->error("无权限");
             $Validate = new AdminValidate();
             if (!$Validate->scene('profile')->check($this->param)) {
                 $this->error($Validate->getError());
@@ -44,6 +45,7 @@ class Profile extends AdminLogin
      */
     public function avatar()
     {
+        $this->wrong(500,"无权限");
         $file = $this->request->file('file');
 
         if (empty($file)) {

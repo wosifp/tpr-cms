@@ -58,7 +58,7 @@ class Admin extends AdminLogin
      */
     public function add(){
         if( $this->request->isPost()){
-
+            $this->error("无权限");
             $Validate = new AdminValidate();
             if (!$Validate->scene('add')->check($this->param)) {
                 $this->error($Validate->getError());
@@ -102,8 +102,8 @@ class Admin extends AdminLogin
     public function edit()
     {
         $id = $this->param['id'];
-
         if ($this->request->isPost()) {
+            $this->error("无权限");
             $Validate = new AdminValidate();
             if (!$Validate->scene('update')->check($this->param)) {
                 $this->error($Validate->getError());
@@ -129,6 +129,7 @@ class Admin extends AdminLogin
      * 删除管理员用户
      */
     public function delete(){
+        $this->error("无权限");
         $id = $this->request->param('id',0);
         $exist = Db::name('admin')->where('id',$id)->count();
 
