@@ -12,7 +12,6 @@ namespace tpr\admin\user\controller;
 use tpr\admin\common\controller\AdminBase;
 use think\Config;
 use think\Db;
-use think\Session;
 use think\Env;
 use think\Cache;
 use think\Tool;
@@ -24,7 +23,11 @@ class Login extends AdminBase
     /**
      * 登陆
      * @return mixed
-     * @except
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
      */
     public function index()
     {
@@ -75,7 +78,7 @@ class Login extends AdminBase
      */
     public function logout()
     {
-        Session::delete('user');
+        clear_user_login();
         $this->redirect("user/login/index");
     }
 

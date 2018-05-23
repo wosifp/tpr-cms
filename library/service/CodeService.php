@@ -54,16 +54,13 @@ class CodeService
         $key = self::key($to);
         $code = mt_rand(100000, 999999);
 
-        $data = [
-            '0' => $code, '1' => $time / 60
-        ];
+        $result = SmsService::instance('sms.'.self::$rest)->sendCode($to, $code, 'code');
 
-        $result = RestService::rest(self::$rest)->sentMessage($to, $data, 'code');
         if ($result) {
             RedisService::redis()->switchDB(0)->set($key, strval($code), $time);
         } else {
-            self::$code = RestService::$code;
-            self::$msg = RestService::$msg;
+            self::$code = "500";
+            self::$msg = "message send service error";
         }
         return $result;
     }
