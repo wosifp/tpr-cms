@@ -9,12 +9,12 @@
 
 namespace tpr\admin\user\controller;
 
+use library\connector\Mysql;
 use tpr\admin\common\controller\AdminBase;
-use think\Config;
-use think\Db;
-use think\Env;
-use think\Cache;
-use think\Tool;
+use tpr\framework\Config;
+use tpr\framework\Env;
+use tpr\framework\Cache;
+use tpr\framework\Tool;
 
 class Login extends AdminBase
 {
@@ -23,17 +23,14 @@ class Login extends AdminBase
     /**
      * 登陆
      * @return mixed
-     * @throws \think\Exception
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     * @throws \think\exception\PDOException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
+     * @throws \tpr\framework\Exception
      */
     public function index()
     {
-        if (is_user_login()) {
-            $this->redirect("index/index/index");
-        }
         if($this->request->isPost()){
             $this->checkIp();
 
@@ -45,7 +42,7 @@ class Login extends AdminBase
                 $this->error("验证码不正确", captcha_src());
             };
 
-            $user = Db::name('admin')->where('username', $username)->find();
+            $user = Mysql::name('admin')->where('username', $username)->find();
             if (empty($user)) {
                 $this->error("用户不存在", captcha_src());
             }
@@ -58,7 +55,7 @@ class Login extends AdminBase
             $user['token'] = Tool::uuid();
             $user['last_login_ip'] = $this->ip;
             $user['last_login_time'] = time();
-            Db::name('admin')->where('id', $user['id'])->update($user);
+            Mysql::name('admin')->where('id', $user['id'])->update($user);
             unset($user['password']);
             unset($user['security_id']);
             user_save($user);
@@ -68,6 +65,9 @@ class Login extends AdminBase
             Cache::set("admin_login_token" . $user['username'], $user['token'], $expire);
 
             $this->success("操作成功", url('index/index/index'));
+        }
+        if (is_user_login()) {
+            $this->redirect("index/index/index");
         }
         return $this->fetch('login');
     }

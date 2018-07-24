@@ -10,7 +10,7 @@
 namespace tpr\admin\index\controller;
 
 
-use think\Controller;
+use tpr\framework\Controller;
 
 class Message extends Controller
 {
@@ -18,9 +18,6 @@ class Message extends Controller
      * @except
      */
     public function none(){
-        $this->ajaxReturn([
-            'code'=>401,
-            'msg'=>'无授权'
-        ]);
+        $this->wrong(401,'无授权');
     }
 }

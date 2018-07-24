@@ -10,7 +10,7 @@
 namespace tpr\admin\system\controller;
 
 use library\logic\NodeLogic;
-use think\Db;
+use library\connector\Mysql;
 use tpr\admin\common\controller\AdminLogin;
 
 /**
@@ -22,9 +22,11 @@ class Node extends AdminLogin
     /**
      * 权限管理
      * @return mixed
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
+     * @throws \tpr\framework\Exception
      */
     public function index(){
         if($this->request->isPost()){
@@ -40,9 +42,11 @@ class Node extends AdminLogin
 
     /**
      * 获取权限节点数据
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
+     * @throws \tpr\framework\Exception
      */
     public function auth(){
         $role_id = $this->request->param('role_id',0);
@@ -53,7 +57,7 @@ class Node extends AdminLogin
         $result = NodeLogic::adminNode(false);
         $list = $result['list'];
 
-        $role_node = Db::name('role_node')->where('role_id',$role_id)->where('disabled' , 0)->select();
+        $role_node = Mysql::name('role_node')->where('role_id',$role_id)->where('disabled' , 0)->select();
         $role_path_list = [];
         foreach ($role_node as $rn){
             array_push($role_path_list , $rn['node_path']);

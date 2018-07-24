@@ -8,8 +8,8 @@
  */
 namespace tpr\admin\app\controller;
 
-use think\Db;
-use think\Tool;
+use library\connector\Mysql;
+use tpr\framework\Tool;
 use tpr\admin\app\validate\Application;
 use tpr\admin\common\controller\AdminLogin;
 
@@ -17,9 +17,11 @@ class Index extends AdminLogin{
     /**
      * 应用列表
      * @return mixed
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
+     * @throws \tpr\framework\Exception
      */
     public function index()
     {
@@ -33,12 +35,12 @@ class Index extends AdminLogin{
                 $keyword = '%' . $keyword . '%';
                 $where['app_name'] = ['like',$keyword];
             }
-            $list = Db::name('app')->page($page)->where($where)->limit($limit)->select();
+            $list = Mysql::name('app')->page($page)->where($where)->limit($limit)->select();
             foreach($list as &$r){
                 $r['last_version_time'] = trans2time($r['last_version_time']);
             }
             unset($r);
-            $count = Db::name('app')->where($where)->count();
+            $count = Mysql::name('app')->where($where)->count();
 
             $this->tableData($list , $count);
         }
@@ -48,11 +50,11 @@ class Index extends AdminLogin{
     /**
      * 编辑应用信息
      * @return mixed
-     * @throws \think\Exception
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     * @throws \think\exception\PDOException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
+     * @throws \tpr\framework\Exception
      */
     public function edit(){
         $id = $this->param['id'];
@@ -63,12 +65,12 @@ class Index extends AdminLogin{
                 'app_name'=>$this->param['app_name']
             ];
 
-            $result = Db::name('app')->where('id',$id)->update($update);
+            $result = Mysql::name('app')->where('id',$id)->update($update);
 
             $result ? $this->success(lang('success')) : $this->error(lang('error'));
         }
 
-        $data = Db::name('app')->where('id',$id)->find();
+        $data = Mysql::name('app')->where('id',$id)->find();
         $this->assign('data',$data);
 
         return $this->fetch();
@@ -77,15 +79,16 @@ class Index extends AdminLogin{
     /**
      * 查看应用详细信息
      * @return mixed
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
      */
     public function view()
     {
         $id = $this->param['id'];
 
-        $app = Db::name('app')->where('id', $id)->find();
+        $app = Mysql::name('app')->where('id', $id)->find();
         if (!empty($app)) {
             $app['last_version_time'] = trans2time($app['last_version_time']);
             $app['created_at'] = trans2time($app['created_at']);
@@ -99,6 +102,11 @@ class Index extends AdminLogin{
     /**
      * 创建应用
      * @return mixed
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
+     * @throws \tpr\framework\Exception
      */
     public function create()
     {
@@ -120,7 +128,7 @@ class Index extends AdminLogin{
                 'app_secret'=>Tool::uuid("app_secret")
             ];
 
-            if (Db::name('app')->insertGetId($insert)) {
+            if (Mysql::name('app')->insertGetId($insert)) {
                 $this->success('Operation is successful');
             } else {
                 $this->error('The operation failure');

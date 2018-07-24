@@ -9,11 +9,11 @@
 
 namespace tpr\admin\common\controller;
 
-use library\controller\HomeBase;
-use think\Request;
-use think\Session;
+use tpr\framework\Controller;
+use tpr\framework\Request;
+use tpr\framework\Session;
 
-class AdminBase extends HomeBase
+class AdminBase extends Controller
 {
     protected $config;
 
@@ -28,14 +28,9 @@ class AdminBase extends HomeBase
         $this->assign('current_url', $this->request->path());
     }
 
-    protected function tableData($data, $count = 0, $msg='success'){
-        $result = [
-            'code'  => 0,
-            'msg'   => lang($msg),
-            'count' => $count,
-            'data'  => $data
-        ];
-        $this->ajaxReturn($result);
+    protected function tableData($data, $count = 0){
+        $this->setResult('count',$count);
+        $this->response($data,0);
     }
 
     public function _empty()

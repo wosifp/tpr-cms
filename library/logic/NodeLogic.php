@@ -9,8 +9,8 @@
 
 namespace library\logic;
 
-use think\Db;
-use think\Doc;
+use library\connector\Mysql;
+use tpr\framework\Doc;
 
 class NodeLogic
 {
@@ -25,9 +25,10 @@ class NodeLogic
      * @param string $app_name
      * @param string $app_path
      * @return array
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
      */
     public static function adminNode($page = 1, $limit = 10, $app_name = APP_NAMESPACE , $app_path = APP_PATH)
     {
@@ -60,7 +61,7 @@ class NodeLogic
 
         $node_list = $page ? array_slice($node_list, ($page - 1) * $limit, $limit) : $node_list;
 
-        $menus = Db::name('menu')->field('title , module , controller , func')->select();
+        $menus = Mysql::name('menu')->field('title , module , controller , func')->select();
         $menu_list = [];
         foreach ($menus as &$m) {
             $path = $m['module'] . '/' . $m['controller'] . '/' . $m['func'];
@@ -81,9 +82,10 @@ class NodeLogic
     /**
      * @param $role_id
      * @return array
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
      */
     public static function roleNode($role_id)
     {
@@ -93,7 +95,7 @@ class NodeLogic
 
         self::$roleId = $role_id;
 
-        $role_node_list = Db::name('role_node')->where('role_id', self::$roleId)->where('disabled',0)->select();
+        $role_node_list = Mysql::name('role_node')->where('role_id', self::$roleId)->where('disabled',0)->select();
 
         $role_node_array = [];
 

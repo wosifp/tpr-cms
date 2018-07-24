@@ -12,16 +12,17 @@ namespace tpr\admin\system\controller;
 use library\logic\NodeLogic;
 use tpr\admin\common\controller\AdminLogin;
 use tpr\admin\common\model\MenuModel;
-use think\Db;
+use library\connector\Mysql;
 
 class Menu extends AdminLogin
 {
     /**
      * 菜单管理
      * @return mixed
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
      */
     public function index()
     {
@@ -29,7 +30,7 @@ class Menu extends AdminLogin
         $parent_menu = $Menu->getMenu();
         $this->assign('parent_menu', $parent_menu);
 
-        $node_count = Db::name('menu')->count();
+        $node_count = Mysql::name('menu')->count();
         $limit = 10;
         $pages = ($node_count % $limit) ? 1 + $node_count / $limit : $node_count / $limit;
         $this->assign('pages', $pages);
@@ -40,9 +41,11 @@ class Menu extends AdminLogin
     /**
      * 添加菜单
      * @return mixed
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
+     * @throws \tpr\framework\Exception
      */
     public function add()
     {
@@ -63,7 +66,7 @@ class Menu extends AdminLogin
                 'sort' => $this->param['sort']
             ];
 
-            if (Db::name('menu')->insertGetId($data)) {
+            if (Mysql::name('menu')->insertGetId($data)) {
                 $this->success('操作成功');
             } else {
                 $this->error('操作失败');
@@ -83,9 +86,10 @@ class Menu extends AdminLogin
 
     /**
      * 获取菜单数据
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
      */
     public function getMenu()
     {
@@ -95,11 +99,11 @@ class Menu extends AdminLogin
     /**
      * 编辑菜单信息
      * @return mixed
-     * @throws \think\Exception
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     * @throws \think\exception\PDOException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
+     * @throws \tpr\framework\Exception
      */
     public function edit()
     {
@@ -114,14 +118,14 @@ class Menu extends AdminLogin
                 $this->error("当前菜单与父级菜单相同<br />请选择其它父级菜单");
             }
 
-            if (Db::name('menu')->where('id', $id)->update($this->param)) {
+            if (Mysql::name('menu')->where('id', $id)->update($this->param)) {
                 $this->success('更新成功', '', $this->param);
             } else {
                 $this->error('更新失败');
             }
         }
 
-        $menu = Db::name('menu')->where('id', $id)->find();
+        $menu = Mysql::name('menu')->where('id', $id)->find();
         $this->assign('data', $menu);
 
         $parent_menu = MenuModel::model()->getMenu();
@@ -136,13 +140,16 @@ class Menu extends AdminLogin
 
     /**
      * 删除菜单
-     * @throws \think\Exception
-     * @throws \think\exception\PDOException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
+     * @throws \tpr\framework\Exception
      */
     public function delete()
     {
         $id = $this->request->param('id', 0);
-        if (Db::name('menu')->where('id', $id)->delete()) {
+        if (Mysql::name('menu')->where('id', $id)->delete()) {
             $this->success("删除成功");
         } else {
             $this->error("操作失败");
@@ -151,17 +158,19 @@ class Menu extends AdminLogin
 
     /**
      * 获取所有菜单
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
+     * @throws \tpr\framework\Exception
      */
     public function getAllMenu()
     {
         $page = $this->request->param('page', 1);
         $limit = $this->request->param('limit', 10);
 
-        $nodes = Db::name('menu')->page($page)->limit($limit)->select();
-        $node_count = Db::name('menu')->count();
+        $nodes = Mysql::name('menu')->page($page)->limit($limit)->select();
+        $node_count = Mysql::name('menu')->count();
 
         $pages = ($node_count % $limit) ? 1 + $node_count / $limit : $node_count / $limit;
 

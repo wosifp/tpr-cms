@@ -9,8 +9,8 @@
 
 namespace library\logic;
 
-use think\Db;
-use think\Session;
+use library\connector\Mysql;
+use tpr\framework\Session;
 
 class UserLogic
 {
@@ -19,13 +19,14 @@ class UserLogic
     /**
      * @param $open_id
      * @param $wechat
-     * @return array|false|null|\PDOStatement|string|\think\Model
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @return array|false|null|\PDOStatement|string
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
      */
     public static function getUserInfoByOpenId($open_id, $wechat){
-        self::$user = Db::name('users')->alias('u')
+        self::$user = Mysql::name('users')->alias('u')
             ->join('__USERS_WECHAT__ uw','uw.user_uniq=u.user_uniq','left')
             ->where('uw.openid', $open_id)
             ->where('uw.wechat',$wechat)
@@ -39,13 +40,14 @@ class UserLogic
     /**
      * @param $login_name
      * @param $wechat
-     * @return array|false|null|\PDOStatement|string|\think\Model
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @return array|false|null|\PDOStatement|string
+     * @throws \ErrorException
+     * @throws \tpr\db\exception\BindParamException
+     * @throws \tpr\db\exception\Exception
+     * @throws \tpr\db\exception\PDOException
      */
     public static function getUserInfoByLoginName($login_name, $wechat){
-        self::$user = Db::name('users')->alias('u')
+        self::$user = Mysql::name('users')->alias('u')
             ->join('__USERS_WECHAT__ uw','uw.user_uniq=u.user_uniq','left')
             ->where('u.login_name',$login_name)
             ->where('uw.wechat',$wechat)
@@ -63,6 +65,6 @@ class UserLogic
             'timestamp'=>time()
         ];
         // 建立该用户与当前微信公众号的关联记录
-        return Db::name('users_wechat')->insert($users_wechat,true);
+        return Mysql::name('users_wechat')->insert($users_wechat,true);
     }
 }
