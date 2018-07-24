@@ -1,7 +1,6 @@
 <?php
 /**
  * @author: axios
- *
  * @email: axioscros@aliyun.com
  * @blog:  http://hanxv.cn
  * @datetime: 2017/9/20 上午10:00
@@ -25,51 +24,48 @@ class Version extends AdminLogin
      * @throws \tpr\db\exception\PDOException
      * @throws \tpr\framework\Exception
      */
-    public function index(){
-        if($this->request->isPost()){
-            $page = $this->param['page'];
-            $limit = $this->param['limit'];
-            $keyword = $this->request->param('keyword' , '');
-            $app_id = $this->request->param('app_id',0);
-            $where = [];
-            $query = Mysql::name('app_version')->alias('v')
-                ->join('__APP__ app' ,'app.app_id=v.app_id')
+    public function index()
+    {
+        if ($this->request->isPost()) {
+            $page    = $this->param['page'];
+            $limit   = $this->param['limit'];
+            $keyword = $this->request->param('keyword', '');
+            $app_id  = $this->request->param('app_id', 0);
+            $where   = [];
+            $query   = Mysql::name('app_version')->alias('v')
+                ->join('__APP__ app', 'app.app_id=v.app_id')
                 ->field('v.id , app.app_name , v.app_version , v.app_key ,v.publish_time ,v.version_type,v.app_build,v.app_status')
                 ->order('publish_time desc')
                 ->page($page)
                 ->limit($limit);
 
-            if(!empty($keyword)){
-                if(strlen($keyword) === 32){
-                    $query = $query->where('v.app_key',$keyword);
-                }else{
-                    if(strpos($keyword ,'-')!==false){
-                        list($version , $build) = explode('-',$keyword);
-                        $query = $query->where('v.app_version',$version)
-                            ->where('v.app_build',$build);
-                    }else{
-                        $query = $query->whereOr('v.app_version',$keyword)
-                            ->whereOr('v.app_build',$keyword);
+            if (!empty($keyword)) {
+                if (strlen($keyword) === 32) {
+                    $query = $query->where('v.app_key', $keyword);
+                } else {
+                    if (strpos($keyword, '-') !== false) {
+                        list($version, $build) = explode('-', $keyword);
+                        $query = $query->where('v.app_version', $version)
+                            ->where('v.app_build', $build);
+                    } else {
+                        $query = $query->whereOr('v.app_version', $keyword)
+                            ->whereOr('v.app_build', $keyword);
                     }
                 }
             }
-            if(!empty($app_id)){
+            if (!empty($app_id)) {
                 $where['v.app_id'] = $app_id;
-                $query = $query->where('v.app_id',$app_id);
+                $query             = $query->where('v.app_id', $app_id);
             }
             $list = $query->select();
 
-            foreach ($list as &$l){
-                $l['publish_time'] = trans2time($l['publish_time']);
-            }
-
             $count = Mysql::name('app_version')->alias('v')->where($where)->count();
-            $this->tableData($list , $count);
+            $this->tableData($list, $count);
         }
 
         $app = Mysql::name('app')->select();
 
-        $this->assign('app',$app);
+        $this->assign('app', $app);
 
         return $this->fetch();
     }
@@ -82,14 +78,15 @@ class Version extends AdminLogin
      * @throws \tpr\db\exception\Exception
      * @throws \tpr\db\exception\PDOException
      */
-    public function timeLine(){
+    public function timeLine()
+    {
         $list = Mysql::name('app_version')->alias('v')
-            ->join('__APP__ app' ,'app.app_id=v.app_id')
+            ->join('__APP__ app', 'app.app_id=v.app_id')
             ->field('v.id , app.app_name , v.app_version , v.app_key ,v.publish_time ,v.version_type,v.app_build,v.app_status,v.remark')
             ->order('publish_time desc')
             ->select();
 
-        $this->assign('version',$list);
+        $this->assign('version', $list);
 
         return $this->fetch('time_line');
     }
@@ -112,7 +109,7 @@ class Version extends AdminLogin
                 $this->error($Validate->getError());
             }
 
-            $app_version = !empty($this->param['app_build'])?$this->param['app_version'] . '.' . $this->param['app_build']:$this->param['app_version'];
+            $app_version = !empty($this->param['app_build']) ? $this->param['app_version'] . '.' . $this->param['app_build'] : $this->param['app_version'];
 
             $insert = [
                 'app_id'       => $this->param['app_id'],
@@ -126,7 +123,7 @@ class Version extends AdminLogin
             ];
 
             if (Mysql::name('app_version')->insertGetId($insert)) {
-                $app['last_version'] = $app_version;
+                $app['last_version']      = $app_version;
                 $app['last_version_time'] = time();
                 Mysql::name('app')->where('app_id', $this->param['app_id'])->update($app);
 
@@ -136,17 +133,17 @@ class Version extends AdminLogin
             $this->error('error');
         }
 
-        $id = $this->request->param('id' , '');
-        $this->assign('app_id',$id);
+        $id = $this->request->param('id', '');
+        $this->assign('app_id', $id);
         $apps = Mysql::name('app')->field('app_id , app_name, id')->select();
 
-        $this->assign('apps',$apps);
+        $this->assign('apps', $apps);
 
-        if(empty($id)){
+        if (empty($id)) {
             $version['version'] = "请选择";
-            $version['build'] = '请选择';
+            $version['build']   = '请选择';
             $this->assign('app_key', Tool::uuid('app_key'));
-        }else{
+        } else {
             $app = Mysql::name('app')->find($id);
             $this->assign('app', $app);
             $this->assign('app_key', Tool::uuid('app_key'));
@@ -155,7 +152,7 @@ class Version extends AdminLogin
                 $version = $this->makeAppVersion($app, 0);
             } else {
                 $version['version'] = "请选择";
-                $version['build'] = '请选择';
+                $version['build']   = '请选择';
             }
         }
 
@@ -174,21 +171,21 @@ class Version extends AdminLogin
      */
     public function getVersion()
     {
-        $app_id = $this->param['app_id'];
+        $app_id       = $this->param['app_id'];
         $version_type = $this->param['version_type'];
-        $update_type = $this->param['update_type'];
+        $update_type  = $this->param['update_type'];
 
         $app = Mysql::name('app')->where('app_id', $app_id)->find();
         if (empty($app)) {
-            $app = ['version'=>'请选择', 'build'=>'请选择'];
+            $app = ['version' => '请选择', 'build' => '请选择'];
             $this->response($app);
         }
 
         $version = $this->makeAppVersion($app, $update_type, $version_type);
 
-        $count = Mysql::name('app_version')->where('app_id',$app_id)
-            ->where('app_build',$version['build'])->count();
-        if($count){
+        $count = Mysql::name('app_version')->where('app_id', $app_id)
+            ->where('app_build', $version['build'])->count();
+        if ($count) {
             $version['build'] = $version['build'] . '_' . (++$count);
         }
 
@@ -204,27 +201,28 @@ class Version extends AdminLogin
      * @throws \tpr\db\exception\PDOException
      * @throws \tpr\framework\Exception
      */
-    public function remark(){
-        $id = $this->request->param('id',0);
+    public function remark()
+    {
+        $id = $this->request->param('id', 0);
 
-        if($this->request->isPost()){
-            $remark = $this->request->param('remark','');
+        if ($this->request->isPost()) {
+            $remark = $this->request->param('remark', '');
             $remark = htmlspecialchars($remark);
 
             Mysql::name('app_version')
-                ->where('id',$id)
-                ->setField('remark',$remark);
+                ->where('id', $id)
+                ->setField('remark', $remark);
 
             $this->success(lang('success'));
         }
 
-        $this->assign('id',$id);
+        $this->assign('id', $id);
         $version = Mysql::name('app_version')
-            ->where('id',$id)
+            ->where('id', $id)
             ->field('id,remark')
             ->find();
 
-        $this->assign('remark',htmlspecialchars_decode($version['remark']));
+        $this->assign('remark', htmlspecialchars_decode($version['remark']));
 
         return $this->fetch();
     }
@@ -243,12 +241,12 @@ class Version extends AdminLogin
         if (!empty($app['last_version'])) {
             list($temp_main, $temp_next, $temp_debug) = explode(".", $app['last_version']);
         } else {
-            $temp_main = $temp_base;
-            $temp_next = 0;
+            $temp_main  = $temp_base;
+            $temp_next  = 0;
             $temp_debug = 0;
         }
-        $main = $temp_main;
-        $next = 0;
+        $main  = $temp_main;
+        $next  = 0;
         $debug = 0;
         switch ($update_type) {
             case 2:
@@ -258,7 +256,7 @@ class Version extends AdminLogin
                 $next = ++$temp_next;
                 break;
             case 0:
-                $next = $temp_next;
+                $next  = $temp_next;
                 $debug = ++$temp_debug;
                 break;
         }
@@ -277,7 +275,7 @@ class Version extends AdminLogin
     {
         $app = [
             'version' => $main . "." . $next . "." . $debug,
-            'build' => date("ymd") . "_" . $type
+            'build'   => date("ymd") . "_" . $type
         ];
         return $app;
     }
